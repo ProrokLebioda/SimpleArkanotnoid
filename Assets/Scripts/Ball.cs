@@ -6,16 +6,39 @@ public class Ball : MonoBehaviour
 {
     public float speed = 10.0f;
     Rigidbody rb;
+
+    Renderer _renderer;
+
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        _renderer = GetComponent<Renderer>();
+        Invoke("Launch", 0.5f);
+    }
+
+    void Launch()
+    {
         rb.velocity = Vector2.up * speed;
+    }
+
+    private void DestroyBall()
+    {
+        GameManager.Instance.Lives--;
+        Destroy(gameObject);
+    }
+
+    private void FixedUpdate()
+    {
+        if (!_renderer.isVisible)
+        {
+            DestroyBall();
+        }
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.name == "PlayerPaddle")
+        if (collision.gameObject.CompareTag("Player"))
         {
             float x = hitFactor(transform.position,
                                 collision.transform.position,
@@ -25,6 +48,10 @@ public class Ball : MonoBehaviour
 
             //set velocity with dir * speed
             rb.velocity = dir * speed;
+        }
+        else if (collision.gameObject.CompareTag("DangerZone"))
+        {
+            DestroyBall();
         }
     }
 
